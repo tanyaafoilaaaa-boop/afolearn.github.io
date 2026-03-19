@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Aflearn — Portal Belajar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0e1a;
+      --surface: #111827;
+      --surface2: #1a2236;
+      --accent: #38bdf8;
+      --accent2: #818cf8;
+      --accent3: #34d399;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --border: rgba(255,255,255,0.07);
+      --glow: rgba(56,189,248,0.18);
+    }
+
+    html, body {
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Sora', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── Background orbs ── */
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: 0.22;
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::before {
+      width: 560px; height: 560px;
+      background: radial-gradient(circle, #38bdf8, transparent 70%);
+      top: -120px; left: -120px;
+    }
+    body::after {
+      width: 480px; height: 480px;
+      background: radial-gradient(circle, #818cf8, transparent 70%);
+      bottom: -100px; right: -100px;
+    }
+
+    /* ── Layout ── */
+    .container {
+      position: relative; z-index: 1;
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 48px 20px 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    /* ── Header ── */
+    .logo {
+      width: 68px; height: 68px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 30px;
+      box-shadow: 0 0 32px var(--glow);
+      margin-bottom: 18px;
+      animation: popIn .55s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    h1 {
+      font-size: 2rem; font-weight: 800;
+      letter-spacing: -0.03em;
+      background: linear-gradient(120deg, #f1f5f9 30%, var(--accent));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      animation: fadeUp .5s .1s both;
+    }
+    .tagline {
+      font-size: .85rem; color: var(--muted);
+      margin-top: 6px; margin-bottom: 40px;
+      font-weight: 300; letter-spacing: .02em;
+      animation: fadeUp .5s .18s both;
+    }
+
+    /* ── Breadcrumb ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 6px;
+      font-family: 'DM Mono', monospace;
+      font-size: .72rem; color: var(--muted);
+      margin-bottom: 28px;
+      min-height: 22px;
+      animation: fadeUp .4s .25s both;
+      flex-wrap: wrap; justify-content: center;
+    }
+    .breadcrumb span { color: var(--accent); }
+    .breadcrumb .sep { opacity: .4; }
+
+    /* ── Screen ── */
+    .screen { display: none; width: 100%; flex-direction: column; gap: 14px; }
+    .screen.active { display: flex; animation: fadeUp .38s ease both; }
+
+    /* ── Section label ── */
+    .section-label {
+      font-size: .72rem; font-weight: 600;
+      letter-spacing: .12em; text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 4px;
+      padding-left: 4px;
+    }
+
+    /* ── Card button ── */
+    .card {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px 22px;
+      cursor: pointer;
+      display: flex; align-items: center; gap: 16px;
+      transition: transform .18s, box-shadow .18s, border-color .18s, background .18s;
+      text-decoration: none; color: inherit;
+      position: relative; overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(120deg, transparent 60%, rgba(255,255,255,.03));
+      pointer-events: none;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(0,0,0,.35), 0 0 0 1px rgba(56,189,248,.22);
+      border-color: rgba(56,189,248,.3);
+      background: var(--surface2);
+    }
+    .card:active { transform: translateY(0); }
+
+    .card-icon {
+      width: 44px; height: 44px; min-width: 44px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .card-text { flex: 1; }
+    .card-title { font-size: 1rem; font-weight: 600; }
+    .card-sub { font-size: .78rem; color: var(--muted); margin-top: 2px; }
+    .card-arrow { color: var(--muted); font-size: 1.1rem; transition: transform .18s, color .18s; }
+    .card:hover .card-arrow { transform: translateX(4px); color: var(--accent); }
+
+    /* ── Color themes per class ── */
+    .theme-x   { background: linear-gradient(135deg,#0ea5e9,#0284c7); }
+    .theme-xi  { background: linear-gradient(135deg,#8b5cf6,#7c3aed); }
+    .theme-xii { background: linear-gradient(135deg,#f97316,#ea580c); }
+    .theme-tka { background: linear-gradient(135deg,#f43f5e,#e11d48); }
+
+    .theme-math { background: linear-gradient(135deg,#38bdf8,#0ea5e9); }
+    .theme-phys { background: linear-gradient(135deg,#a78bfa,#8b5cf6); }
+    .theme-chem { background: linear-gradient(135deg,#34d399,#059669); }
+    .theme-bio  { background: linear-gradient(135deg,#fb923c,#f97316); }
+
+    .theme-materi   { background: linear-gradient(135deg,#38bdf8,#818cf8); }
+    .theme-latihan  { background: linear-gradient(135deg,#34d399,#0ea5e9); }
+
+    /* Stagger children */
+    .screen.active .card:nth-child(1) { animation-delay: .04s; }
+    .screen.active .card:nth-child(2) { animation-delay: .10s; }
+    .screen.active .card:nth-child(3) { animation-delay: .16s; }
+    .screen.active .card:nth-child(4) { animation-delay: .22s; }
+    .screen.active .card:nth-child(5) { animation-delay: .28s; }
+    .screen.active .card:nth-child(6) { animation-delay: .34s; }
+
+    /* ── Back button ── */
+    .back-btn {
+      display: flex; align-items: center; gap: 8px;
+      background: none; border: 1px solid var(--border);
+      color: var(--muted); font-family: 'Sora', sans-serif;
+      font-size: .8rem; padding: 8px 16px; border-radius: 99px;
+      cursor: pointer; margin-bottom: 10px; align-self: flex-start;
+      transition: color .18s, border-color .18s;
+    }
+    .back-btn:hover { color: var(--text); border-color: rgba(255,255,255,.2); }
+
+    /* ── Link card (external) ── */
+    .link-card {
+      width: 100%;
+      border-radius: 16px;
+      padding: 20px 22px;
+      display: flex; align-items: center; gap: 16px;
+      text-decoration: none; color: var(--text);
+      position: relative; overflow: hidden;
+      transition: transform .18s, box-shadow .18s;
+      border: 1px solid transparent;
+    }
+    .link-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,.4); }
+    .link-card:active { transform: translateY(0); }
+    .link-card .card-icon { background: rgba(255,255,255,.15); }
+
+    .lc-materi  { background: linear-gradient(135deg,#1e3a5f,#1e3c72); border-color: rgba(56,189,248,.25); }
+    .lc-latihan { background: linear-gradient(135deg,#0f3d2f,#134e38); border-color: rgba(52,211,153,.25); }
+
+    /* ── Notice ── */
+    .notice {
+      font-size: .75rem; color: var(--muted);
+      text-align: center; margin-top: 8px;
+      font-family: 'DM Mono', monospace;
+    }
+    .notice a { color: var(--accent); text-decoration: none; }
+
+    /* ── Footer ── */
+    .footer {
+      margin-top: 56px;
+      font-size: .72rem; color: rgba(148,163,184,.4);
+      text-align: center; font-family: 'DM Mono', monospace;
+      letter-spacing: .04em;
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(.7); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    /* ── Divider ── */
+    .divider {
+      width: 100%; height: 1px;
+      background: var(--border);
+      margin: 8px 0;
+    }
+
+    /* ── Pulse dot ── */
+    .live-dot {
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--accent3);
+      box-shadow: 0 0 6px var(--accent3);
+      margin-right: 6px;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; } 50% { opacity: .4; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="logo">📚</div>
+  <h1>Aflearn</h1>
+  <p class="tagline"><span class="live-dot"></span>Portal Belajar Interaktif · SMA</p>
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb" id="breadcrumb">Pilih kelas untuk memulai</div>
+
+  <!-- ══ SCREEN 1 : Pilih Kelas ══ -->
+  <div class="screen active" id="screen-kelas">
+    <div class="section-label">Pilih Kelas / Program</div>
+
+    <button class="card" onclick="pilihKelas('X')">
+      <div class="card-icon theme-x">🎓</div>
+      <div class="card-text">
+        <div class="card-title">Kelas X</div>
+        <div class="card-sub">Tahun pertama</div>
+      </div>
+      <div class="card-arrow">›</div>
+    </button>
+
+    <button class="card" onclick="pilihKelas('XI')">
+      <div class="card-icon theme-xi">🔬</div>
+      <div class="card-text">
+        <div class="card-title">Kelas XI</div>
+        <div class="card-sub">Tahun kedua</div>
+      </div>
+      <div class="card-arrow">›</div>
+    </button>
+
+    <button class="card" onclick="pilihKelas('XII')">
+      <div class="card-icon theme-xii">🚀</div>
+      <div class="card-text">
+        <div class="card-title">Kelas XII</div>
+        <div class="card-sub">Tahun ketiga</div>
+      </div>
+      <div class="card-arrow">›</div>
+    </button>
+
+    <button class="card" onclick="pilihKelas('TKA')">
+      <div class="card-icon theme-tka">🏆</div>
+      <div class="card-text">
+        <div class="card-title">TKA</div>
+        <div class="card-sub">Tes Kemampuan Akademik</div>
+      </div>
+      <div class="card-arrow">›</div>
+    </button>
+  </div>
+
+  <!-- ══ SCREEN 2 : Pilih Mapel ══ -->
+  <div class="screen" id="screen-mapel">
+    <button class="back-btn" onclick="goBack('kelas')">← Kembali</button>
+    <div class="section-label">Pilih Mata Pelajaran</div>
+
+    <button class="card" onclick="pilihMapel('Matematika')">
+      <div class="card-icon theme-math">📐</div>
+      <div class="card-text">
+        <div class="card-title">Matematika</div>
+        <div class="card-sub">Aljabar, Kalkulus, Geometri & lebih</div>
+      </div>
+      <div class="card-arrow">›</div>
+    </button>
+
+    <button class="card" onclick="pilihMapel('Fisika')">
+      <div class="card-icon theme-phys">⚡</div>
+      <div class="card-text">
+        <div class="card-title">Fisika</div>
+        <div class="card-sub">Mekanika, Gelombang, Listrik & lebih</div>
+      </div>
+      <div class="card-arrow">›</div>
+    </button>
+
+    <button class="card" onclick="pilihMapel('Kimia')">
+      <div class="card-icon theme-chem">🧪</div>
+      <div class="card-text">
+        <div class="card-title">Kimia</div>
+        <div class="card-sub">Atom, Reaksi, Stoikiometri & lebih</div>
+      </div>
+      <div class="card-arrow">›</div>
+    </button>
+
+    <button class="card" onclick="pilihMapel('Biologi')">
+      <div class="card-icon theme-bio">🌿</div>
+      <div class="card-text">
+        <div class="card-title">Biologi</div>
+        <div class="card-sub">Sel, Genetika, Ekologi & lebih</div>
+      </div>
+      <div class="card-arrow">›</div>
+    </button>
+  </div>
+
+  <!-- ══ SCREEN 3 : Materi / Latihan ══ -->
+  <div class="screen" id="screen-konten">
+    <button class="back-btn" onclick="goBack('mapel')">← Kembali</button>
+    <div class="section-label" id="konten-label">Pilih Konten</div>
+
+    <a class="link-card lc-materi" id="btn-materi" href="#" target="_blank" rel="noopener">
+      <div class="card-icon">📖</div>
+      <div class="card-text">
+        <div class="card-title">Materi</div>
+        <div class="card-sub">Buka modul & catatan di Google Drive</div>
+      </div>
+      <div class="card-arrow">↗</div>
+    </a>
+
+    <a class="link-card lc-latihan" id="btn-latihan" href="#" target="_blank" rel="noopener">
+      <div class="card-icon">✏️</div>
+      <div class="card-text">
+        <div class="card-title">Latihan Soal</div>
+        <div class="card-sub">Buka bank soal & kunci jawaban</div>
+      </div>
+      <div class="card-arrow">↗</div>
+    </a>
+
+    <p class="notice">🔗 Akan terbuka di tab baru via <a href="#">Google Drive</a></p>
+  </div>
+
+  <div class="footer"Aflearn · SMA · 2025-2026 — belajar lebih mudah</div>
+</div>
+
+<script>
+  // ================================================================
+  // ⚙️  KONFIGURASI LINK GOOGLE DRIVE
+  //  Ganti URL di bawah dengan link Google Drive yang sesuai.
+  //  Format key: "Kelas_Mapel_Tipe"
+  // ================================================================
+  const LINKS = {
+    // Kelas X
+    "X_Matematika_Materi"   : "https://drive.google.com/drive/folders/1ahk3AUeIYbyuQQybyHA0yAZkMLjwEL2z?usp=drive_link",
+    "X_Matematika_Latihan"  : "https://drive.google.com/drive/folders/1jo7QfTyMHCqvMiqMfC78tVErSr2_yaCV?usp=drive_link",
+    "X_Fisika_Materi"       : "https://drive.google.com/drive/folders/1sL7vp-r03DlTth764zOLlrZe6NH0RoP-?usp=drive_link",
+    "X_Fisika_Latihan"      : "https://drive.google.com/drive/folders/1f_dGM_mYHQyaoser_xQqXaZaxtjpyTjH?usp=drive_link",
+    "X_Kimia_Materi"        : "https://drive.google.com/drive/folders/1qBgprLgG4N44L0kruAqMer53a-WRvC9O?usp=drive_link",
+    "X_Kimia_Latihan"       : "https://drive.google.com/drive/folders/1WgafdLeOEwGBNlZT69zPlxn8Kzyy7Jp9?usp=drive_link",
+    "X_Biologi_Materi"      : "https://drive.google.com/drive/folders/1ZUjeuK5OIW-vYbctVpQpOWMEGcOrK6xq?usp=drive_link",
+    "X_Biologi_Latihan"     : "https://drive.google.com/drive/folders/1kRoHJo57DLbBYl6-vLpgJ-e3ntfCeiTs?usp=drive_link",
+
+    // Kelas XI
+    "XI_Matematika_Materi"  : "https://drive.google.com/drive/folders/1GOZUPmrEggmKhrweGixxIv2SoRiLHYXO?usp=drive_link",
+    "XI_Matematika_Latihan" : "https://drive.google.com/drive/folders/1jPUgs4q7Gel8k-m1cESlhfKAfr2DB6EI?usp=drive_link",
+    "XI_Fisika_Materi"      : "https://drive.google.com/drive/folders/1LDFU7w3CR_1okkylmRC9aZ4fTKt_LXuw?usp=drive_link",
+    "XI_Fisika_Latihan"     : "https://drive.google.com/drive/folders/1t-yzLskT9uo1zYX3ym6vaHgLmSDS0oen?usp=drive_link",
+    "XI_Kimia_Materi"       : "https://drive.google.com/drive/folders/15ifpGKkalUXUxhBDqaF_SoHMStw9Trvb?usp=drive_link",
+    "XI_Kimia_Latihan"      : "https://drive.google.com/drive/folders/1rpJokK73cH_xaOJyHLwWJEwfIKPAtdP7?usp=drive_link",
+    "XI_Biologi_Materi"     : "https://drive.google.com/drive/folders/14vcxLCr5uLI45Ovrjo1JpK81YZWrPbMq?usp=drive_link",
+    "XI_Biologi_Latihan"    : "https://drive.google.com/drive/folders/1p_N0n0ZMNA7YSmVuTD6k1pRx0AhrAO-6?usp=drive_link",
+
+    // Kelas XII
+    "XII_Matematika_Materi" : "https://drive.google.com/drive/folders/1mtIXe8GzV4PpqR1Ct909L0skSX350tkY?usp=drive_link",
+    "XII_Matematika_Latihan": "https://drive.google.com/drive/folders/1_pglUtDsLpmJbr1X79VZ5gZWzpf2dZGS?usp=drive_link",
+    "XII_Fisika_Materi"     : "https://drive.google.com/drive/folders/1wG5F5G4NzrNMO2WwpHXtGHyFQWZIgBWI?usp=drive_link",
+    "XII_Fisika_Latihan"    : "https://drive.google.com/drive/folders/1xrF7yfEkGkWCMEY8XD0d3F86do7Q2fGU?usp=drive_link",
+    "XII_Kimia_Materi"      : "https://drive.google.com/drive/folders/1RUQWZJhMlhWZcHcnoYnjPRZ67E4KV88M?usp=drive_link",
+    "XII_Kimia_Latihan"     : "https://drive.google.com/drive/folders/1qcjFmn5iKKmQLrb4XUFPvzM61RqE2ZjD?usp=drive_link",
+    "XII_Biologi_Materi"    : "https://drive.google.com/drive/folders/1LyqIqL8VPSIpY3-fw5_aUMBoWESt2z0T?usp=drive_link",
+    "XII_Biologi_Latihan"   : "https://drive.google.com/drive/folders/1lzSxt0os1PfPCe1z3xJkbp-MGL-1_BTa?usp=drive_link",
+
+    // TKA
+    "TKA_Matematika_Materi" : "https://drive.google.com/drive/folders/12MmsJdQh_V5ISbuWFY_f-tNgxDq_6tgg?usp=drive_link",
+    "TKA_Matematika_Latihan": "https://drive.google.com/drive/folders/1v6QYkwbL_nijBe5E4MnGUtyPiEs6Nyph?usp=drive_link",
+    "TKA_Fisika_Materi"     : "https://drive.google.com/drive/folders/13p-usvmvGmxdAeLTOdwQfXsGYSXgmlJ3?usp=drive_link",
+    "TKA_Fisika_Latihan"    : "https://drive.google.com/drive/folders/15ZNj53_uvkqPqJvmyvU47xHcz8kT4AFi?usp=drive_link",
+    "TKA_Kimia_Materi"      : "https://drive.google.com/drive/folders/1H4JrScagXa7_5ckhr14A-iD0XLaAKFs_?usp=drive_link",
+    "TKA_Kimia_Latihan"     : "https://drive.google.com/drive/folders/1IkryrBlhh1s1HEb07gkdob7MeP1p5Zvj?usp=drive_link",
+    "TKA_Biologi_Materi"    : "https://drive.google.com/drive/folders/1NKgci6HUueQY3G9dHQjUoJrOQMoPcR-l?usp=drive_link",
+    "TKA_Biologi_Latihan"   : "https://drive.google.com/drive/folders/1Pa0Tqb57IOBG-jrzF1vjkw8Hfr_3F0SU?usp=drive_link",
+  };
+
+  // ── State ──
+  let state = { kelas: null, mapel: null };
+
+  // ── Screen switcher ──
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const el = document.getElementById('screen-' + id);
+    el.classList.add('active');
+    // re-trigger animation
+    el.querySelectorAll('.card, .link-card').forEach((c, i) => {
+      c.style.animation = 'none';
+      c.offsetHeight; // reflow
+      c.style.animation = `fadeUp .38s ${i * 0.06 + 0.04}s both`;
+    });
+  }
+
+  // ── Breadcrumb ──
+  function updateBreadcrumb() {
+    const bc = document.getElementById('breadcrumb');
+    let parts = [];
+    if (state.kelas) parts.push(`<span>${state.kelas === 'TKA' ? 'TKA' : 'Kelas ' + state.kelas}</span>`);
+    if (state.mapel) parts.push(`<span>${state.mapel}</span>`);
+    bc.innerHTML = parts.length
+      ? parts.join('<span class="sep"> / </span>')
+      : 'Pilih kelas untuk memulai';
+  }
+
+  // ── Actions ──
+  function pilihKelas(kelas) {
+    state.kelas = kelas;
+    state.mapel = null;
+    updateBreadcrumb();
+    show('mapel');
+  }
+
+  function pilihMapel(mapel) {
+    state.mapel = mapel;
+    updateBreadcrumb();
+
+    // Update label
+    const kelasLabel = state.kelas === 'TKA' ? 'TKA' : `Kelas ${state.kelas}`;
+    document.getElementById('konten-label').textContent =
+      `${kelasLabel} · ${state.mapel}`;
+
+    // Set links
+    const keyM = `${state.kelas}_${state.mapel}_Materi`;
+    const keyL = `${state.kelas}_${state.mapel}_Latihan`;
+    document.getElementById('btn-materi').href  = LINKS[keyM]  || '#';
+    document.getElementById('btn-latihan').href = LINKS[keyL]  || '#';
+
+    show('konten');
+  }
+
+  function goBack(to) {
+    if (to === 'kelas') {
+      state.kelas = null; state.mapel = null;
+      updateBreadcrumb();
+      show('kelas');
+    } else if (to === 'mapel') {
+      state.mapel = null;
+      updateBreadcrumb();
+      show('mapel');
+    }
+  }
+</script>
+</body>
+</html>
